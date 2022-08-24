@@ -86,7 +86,9 @@ public class HelloController {
     public ToggleButton clientBt;
     @FXML
     public ToggleButton requestBt;
+    @FXML
     private TextField artSearchTf;
+    @FXML
     private Button addArtBt;
 
     @FXML

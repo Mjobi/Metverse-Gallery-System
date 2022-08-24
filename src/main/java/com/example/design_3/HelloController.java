@@ -1,26 +1,36 @@
 package com.example.design_3;
 
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
-import javafx.util.converter.NumberStringConverter;
-import org.w3c.dom.Text;
+import javafx.stage.FileChooser;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.util.FXPermission;
 
+import javax.imageio.ImageIO;
+
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import java.awt.image.WritableRaster;
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.Locale;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.sql.*;
+import java.time.LocalDate;
+import java.util.Base64;
 
 public class HelloController {
 
@@ -42,8 +52,43 @@ public class HelloController {
     public ToggleButton clientBt;
     @FXML
     public ToggleButton requestBt;
+    //Add Artwork Use Case elements elements
+    public TextField addArtTypeTf;
+    public TextField addArtStyleTf;
+    public TextField addArtInspirationTf;
+    public TextField addArtPriceTf;
+    public CheckBox addArtOnDisplayCb;
+    public Button addArtCancelBt;
+    public Button addArtConfirmBt;
+    public ChoiceBox addArtStatusCb;
+    public DatePicker addArtDate;
+    public TextField addArtTitleTf;
+
+    //Add Artwork use case elements
+    public Button addArtDialogueBt;
+    public Label addArtSelectedLb;
+    // View client Use case
+    public TableView clientSearchTable;
+    public Button viewClientBt;
+    public TableView artistSearchTable;
+    public Button updateArtistBt;
+    public Button viewArtistBt;
+    public Button removeArtistBt;
+    public Button addArtistBt;
+
+
+    //
     private Pane curContent;
+    // Search artwork use case elements
+    @FXML
     private TextField artSearchTf;
+    public Button artSearchBt;
+    public TableView artSearchTable;
+    public Button removeArtBt;
+    public Button updateArtBt;
+    public Button viewArtBt;
+    //
+    @FXML
     private Button addArtBt;
     //View Artist Use Case
     @FXML
@@ -60,6 +105,12 @@ public class HelloController {
     public Label viewArtistPseudonym;
     @FXML
     public Label viewArtistDYear;
+
+    public TableColumn artistNames;
+    public TableColumn artNamesTb;
+    private File curFile;
+
+    //Tables to store data in
     ObservableList <Artist> artists = FXCollections.observableArrayList();
     ObservableList <Art> artworks = FXCollections.observableArrayList();
     ObservableList <Manager> managers = FXCollections.observableArrayList();
@@ -69,11 +120,11 @@ public class HelloController {
     ObservableList <Purchase> purchases = FXCollections.observableArrayList();
     ObservableList <Request> requests = FXCollections.observableArrayList();
     ObservableList <Viewing> viewings = FXCollections.observableArrayList();
-    private Artist curArtist;
+    //private Artist curArtist;
 
     public HelloController(){
         //connectToDB();
-        updateTable("Select * From Artist;", "Artist");
+        //updateTable("Select * From Artist;", "Artist");
     }
 
     // Manager Page Methods
@@ -92,20 +143,39 @@ public class HelloController {
     }
     @FXML
     protected void onArtBtClick(ActionEvent event) throws IOException{
-        FXMLLoader artPage = new FXMLLoader(HelloApplication.class.getResource("Manager/ArtworkLanding.fxml"));
-        Scene testScene = new Scene(artPage.load());
-        curContent = (Pane)testScene.lookup("#artworkLanding");
-        parentBox.getChildren().remove(1);
-        parentBox.getChildren().add(parentBox.getChildren().size(),curContent);
+        switchContent("Manager/ArtworkLanding.fxml", "artworkLanding");
+        //Setting up the table on the landing page.
+        updateTable("Select * From Art", "Art");
+        curContent = (Pane) parentBox.getChildren().get(1);
+        artSearchTable = (TableView) curContent.lookup("#artSearchTable");
+        artNamesTb = new TableColumn<>("Name");
+        artNamesTb.setCellValueFactory(new PropertyValueFactory<Art,String>("artTitle"));
+        artSearchTable.getColumns().add(artNamesTb);
+        artSearchTable.setItems(artworks);
     }
     @FXML
     protected void onArtistBtClick(ActionEvent event) throws IOException{
-        FXMLLoader artPage = new FXMLLoader(HelloApplication.class.getResource("Manager/ArtistLanding.fxml"));
-        Scene testScene = new Scene(artPage.load());
-        curContent = (Pane)testScene.lookup("#artistLanding");
-        parentBox.getChildren().remove(1);
-        parentBox.getChildren().add(parentBox.getChildren().size(),curContent);
+        try {
+            //switchContent("Manager/ArtistLanding.fxml","#artistLanding" );
+            FXMLLoader artPage = new FXMLLoader(HelloApplication.class.getResource("Manager/ArtistLanding.fxml"));
+            Scene testScene = new Scene(artPage.load());
+            curContent = (Pane) testScene.lookup("#artistLanding");
+            parentBox.getChildren().remove(1);
+            parentBox.getChildren().add(parentBox.getChildren().size(), curContent);
+            //Setting up the table on the landing page.
+            updateTable("Select * From Artist", "Artist");
+            curContent = (Pane) parentBox.getChildren().get(1);
+            artistSearchTable = (TableView) curContent.lookup("#artistSearchTable");
+            artNamesTb = new TableColumn<>("Name");
+            artNamesTb.setCellValueFactory(new PropertyValueFactory<Artist, String>("artistFName"));
+            artistSearchTable.getColumns().add(artNamesTb);
+            artistSearchTable.setItems(artists);
+        }
+        catch (Exception e){
+            System.out.println(e.getMessage());
+        }
     }
+
     @FXML
     protected void onClientBtCLick(ActionEvent event) throws IOException{
         FXMLLoader artPage = new FXMLLoader(HelloApplication.class.getResource("Manager/ClientLanding.fxml"));
@@ -113,6 +183,14 @@ public class HelloController {
         curContent = (Pane)testScene.lookup("#clientLanding");
         parentBox.getChildren().remove(1);
         parentBox.getChildren().add(parentBox.getChildren().size(),curContent);
+        //Setting up the table on the landing page.
+        updateTable("Select * From Client", "Client");
+        curContent = (Pane) parentBox.getChildren().get(1);
+        clientSearchTable = (TableView) curContent.lookup("#clientSearchTable");
+        artNamesTb = new TableColumn<>("Name");
+        artNamesTb.setCellValueFactory(new PropertyValueFactory<Client,String>("viewerFName"));
+        clientSearchTable.getColumns().add(artNamesTb);
+        clientSearchTable.setItems(clients);
     }
     @FXML
     protected void onRequestsBtClick(ActionEvent event) throws IOException
@@ -120,11 +198,7 @@ public class HelloController {
         //This line will replace the commented out paragraph, both do the same thing, but this is obviously cleaner.
         switchContent("Manager/RequestLanding.fxml", "requestLanding");
     }
-    protected void connectToUI (Pane nextPane){
-        // Was just using this to test something, will become the method to connect to all buttons and stuff we need.
-        artSearchTf = (TextField) parentBox.lookup("#artSearchTf");
-        artSearchTf.setText("Yasho!");
-    }
+
     @FXML
     //Still working on this one
     protected void onAddArtClickBt(ActionEvent event) throws IOException{
@@ -157,7 +231,7 @@ public class HelloController {
         parentBox.getChildren().add(parentBox.getChildren().size(),curContent);
     }
 
-    private void updateTable(String sqlString, String tableName )
+    private void updateTable(String sqlString, String tableName)
     // Method to update the table based on sql query
     {
         try {
@@ -189,8 +263,10 @@ public class HelloController {
                     Double artPrice = allNodes.getDouble("Price");
                     int artistID = allNodes.getInt("Artist_ID");
                     int purchaseID = allNodes.getInt("Purchase_ID");
+                    File imageFile = new File(allNodes.getString("Image"));
+                    BufferedImage artImage = ImageIO.read(imageFile);
                     Art newArt = new Art(artID, artTitle,artDate,artType,artStyle,
-                            artInterpretation,artDisplayStatus,artSaleStatus,artPrice,artistID,purchaseID);
+                            artInterpretation,artDisplayStatus,artSaleStatus,artPrice,artistID,purchaseID,artImage);
                     artworks.add(newArt);
                     System.out.println(newArt);//Debugging
                 }
@@ -215,6 +291,7 @@ public class HelloController {
                 break;
             case "Client":
                 clients.clear();
+                updateTable("Select * From Viewer", "Viewer");
                 if(viewers.isEmpty()){
                     System.out.println("No viewers in system, i.e, no clients either");
                 }
@@ -229,7 +306,8 @@ public class HelloController {
                             if (viewerID == curViewerID)
                                 break;
                         }
-                        Client newClient = (Client) curViewer;
+                        Client newClient = new Client(curViewer.getViewerID(),curViewer.getViewerType(),curViewer.getViewerPassword(),
+                                curViewer.getViewerFName(),curViewer.getViewerLName(),curViewer.getViewerEmail(),curViewer.getViewerPhone());
                         newClient.setClientAddress(clientAddress);
                         clients.add(newClient);
                         System.out.println(newClient);
@@ -250,7 +328,6 @@ public class HelloController {
                     managers.add(newManager);
                     System.out.println(newManager);
                 }
-
                 break;
             case "Viewer":
                 viewers.clear();
@@ -322,6 +399,7 @@ public class HelloController {
         }
         catch (Exception e){
             System.out.println("Connection failed.");
+            System.out.println(e.getMessage());
         }
     }
 
@@ -367,19 +445,158 @@ public class HelloController {
     // Artist Page Methods
 
     @FXML
-    protected void onViewArtistClick(ActionEvent event){
+    protected void onViewArtistClick(ActionEvent event) throws IOException {
         //Will still enter the code to connect table selection to selected/ curArtist below
+        parentBox = (HBox)((Button)event.getSource()).getScene().getRoot();
+        switchInner("Manager/ViewArtist.fxml", "viewArtistContent", event);
+        Artist curArtist = (Artist) artistSearchTable.getSelectionModel().selectedItemProperty().getValue();
+        if(curArtist!=null){
+            Pane viewArtist = (Pane)parentBox.getChildren().get(1);
+            viewArtistFName = (Label) viewArtist.lookup("#viewArtistFName");
+            viewArtistLName = (Label) viewArtist.lookup("#viewArtistLName");
+            viewArtistPseudonym = (Label) viewArtist.lookup("#viewArtistPseudonym");
+            viewArtistEmail = (Label) viewArtist.lookup("#viewArtistEmail");
+            viewArtistCountry = (Label) viewArtist.lookup("#viewArtistCountry");
+            viewArtistBYear = (Label) viewArtist.lookup("#viewArtistBYear");
+            viewArtistDYear = (Label) viewArtist.lookup("#viewArtistDYear");
+            //Testing to view Artist from observable list in the window using arbitrary artist.
+            viewArtistFName.setText(curArtist.getArtistFName().getValue());
+            viewArtistLName.setText(curArtist.getArtistLName().getValue());
+            viewArtistPseudonym.setText(curArtist.getArtistPseudonym().getValue());
+            viewArtistEmail.setText(curArtist.getArtistEmail().getValue());
+            viewArtistCountry.setText(curArtist.artistCountry.getValue());
+            viewArtistBYear.setText(String.valueOf(curArtist.getArtistBYear().getValue()));
+            viewArtistDYear.setText(String.valueOf(curArtist.getArtistDYear().getValue()));
+        }
+    }
+    private void imageToBytes(String filePath, String fileName) throws IOException
+    // take image from 'filePath' and converts it into a byte array stored in 'fileName', in this case, on my desktop
+    // Used for debugging
+    {
+        BufferedImage curImage = ImageIO.read(curFile);
+        WritableRaster imageRaster = curImage.getRaster();
+        DataBufferByte imageBuffByte = (DataBufferByte) imageRaster.getDataBuffer();
+        byte[] imageData = imageBuffByte.getData();
+
+        System.out.println(Base64.getEncoder().encodeToString(imageData));
+        File newFile = new File("C:\\Users\\Lwando Macakati\\Desktop\\" + fileName + ".txt");
+        if(newFile.createNewFile()){
+            PrintWriter newWriter = new PrintWriter("C:\\Users\\Lwando Macakati\\Desktop\\" + fileName + ".txt");
+            newWriter.write(Base64.getEncoder().encodeToString(imageData));
+            newWriter.close();
+            System.out.println("Written to text file");
+        }
+        else{
+            System.out.println("Couldn't work right");
+        }
+    }
+    @FXML
+    protected void onChooseImage(ActionEvent event) throws IOException {
+        FileChooser fileCh = new FileChooser();
+        Stage fileExplorer = new Stage();
+        fileExplorer.initOwner(((Button)event.getSource()).getScene().getWindow());
+        fileExplorer.initModality(Modality.APPLICATION_MODAL);
+        curFile = fileCh.showOpenDialog(fileExplorer);
+        addArtSelectedLb.setText(curFile.getName());
+        //imageToBytes(curFile.getName(),"Image1");
+    }
+    @FXML
+    protected void fillElements(Event event){
+        boolean accessed = false;
+        if(addArtStatusCb.getItems().size() == 0 ) {
+            addArtStatusCb.getItems().add("Sold");
+            addArtStatusCb.getItems().add("Test");
+        }
+
+    }
+    @FXML
+    protected void onViewClient(ActionEvent event){
+        Client curClient = (Client) clientSearchTable.getSelectionModel().selectedItemProperty().getValue();
+        if(curClient!=null){
+            //TBC
+        }
+    }
+
+    @FXML
+    protected void enableButtons(Event event){
+        if(viewClientBt!=null){
+            viewClientBt.disableProperty().bind(Bindings.isEmpty(clientSearchTable.getSelectionModel().getSelectedItems()));
+        }
+        else if(artistSearchTable != null){
+            viewArtistBt.disableProperty().bind(Bindings.isEmpty((artistSearchTable.getSelectionModel().getSelectedItems())));
+            removeArtistBt.disableProperty().bind(Bindings.isEmpty((artistSearchTable.getSelectionModel().getSelectedItems())));
+            updateArtistBt.disableProperty().bind(Bindings.isEmpty((artistSearchTable.getSelectionModel().getSelectedItems())));
+        }
+        else if(artSearchTable != null){
+            viewArtBt.disableProperty().bind(Bindings.isEmpty(artSearchTable.getSelectionModel().getSelectedItems()));
+            removeArtBt.disableProperty().bind(Bindings.isEmpty(artSearchTable.getSelectionModel().getSelectedItems()));
+            updateArtBt.disableProperty().bind(Bindings.isEmpty(artSearchTable.getSelectionModel().getSelectedItems()));
+        }
+    }
+    @FXML
+    protected void onAddArtConfirm(ActionEvent event) throws IOException, SQLException
+    //Caters for the addition of new artwork in the database when confirm button is clicked on the add Artwork page
+    {
+        if(checkContentTf() && addArtDate.getValue() != null){
+            String title = addArtTitleTf.getText();
+            String date = (addArtDate.getValue()).toString();
+            String type = addArtTypeTf.getText() ;
+            String style = addArtStyleTf.getText();
+            String interpretation = addArtInspirationTf.getText();
+            Double price = Double.parseDouble(addArtPriceTf.getText());
+            Boolean displayStatus = addArtOnDisplayCb.isSelected();
+            String artStatus = addArtOnDisplayCb.getText();
+            String artistID = "4";//Need to add functionality to search for artist
+            String purchaseID = "1";
+            String imagePath = curFile.getPath();
+            String sqlString =String.format("Insert into Art (Art_Title, Art_Date, Art_type, Art_Style, Interpretation, Display_Status, Sale_Status, Price, Artist_ID, Purchase_ID, Image)\n" +
+                    "Values ('%s', #%s#, '%s', '%s', '%s', '%s', '%s', %s, %s, %s, '%s');",title,date,type,style,interpretation,displayStatus,
+                    artStatus, price, artistID,purchaseID,imagePath);
+            ConnectToDB addArt = new ConnectToDB();
+            addArt.addToDB(sqlString);
+            addArt.close();
+        }
+    }
+    @FXML
+    protected void onSearchArt(Event event)
+    // Handles the search for art use-case
+    {
+        if (artSearchTf.getText() == "") {
+            artSearchTf.getStyleClass().add("searchBarError");
+            artSearchTf.setPromptText("Please enter name of artwork");
+        } else {
+            String searchItem = "'*" + artSearchTf.getText() + "*'";
+            String sqlString = "Select * From Art Where Art_Title Like " + searchItem;
+            updateTable(sqlString, "Art");
+            artSearchTable.setItems(artworks);
+
+        }
+        artSearchTf.focusedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                artSearchTf.getStyleClass().remove(artSearchTf.getStyleClass().size() - 1);
+                artSearchTf.setPromptText("Enter artwork name");
+            }
+        });
+    }
+    private boolean checkContentTf(TextField... textFields){
+        boolean hasValue = true;
+        for(TextField curTf:textFields){
+            if(curTf.getText() == null || curTf.getText()==""){
+                hasValue = false;
+                break;
+            }
+        }
+        return hasValue;
+    }
 
 
-        //Testing to view Artist from observable list in the window using arbitrary artist.
-        curArtist = artists.get(2);
-        viewArtistFName.setText(curArtist.getArtistFName().getValue());
-        viewArtistLName.setText(curArtist.getArtistLName().getValue());
-        viewArtistPseudonym.setText(curArtist.getArtistPseudonym().getValue());
-        viewArtistEmail.setText(curArtist.getArtistEmail().getValue());
-        viewArtistCountry.setText(curArtist.artistCountry.getValue());
-        viewArtistBYear.setText(String.valueOf(curArtist.getArtistBYear().getValue()));
-        viewArtistDYear.setText(String.valueOf(curArtist.getArtistDYear().getValue()));
-
+    private void updateTableView(String sqlString, String tableName, String tableFxId, String tableColumnName, String attributeName){
+        updateTable(sqlString, tableName);
+        curContent = (Pane)parentBox.getChildren().get(1);
+        artistSearchTable = (TableView) curContent.lookup("#" + tableFxId);
+        artNamesTb = new TableColumn<>(tableColumnName);
+        artNamesTb.setCellValueFactory(new PropertyValueFactory<Artist,String>(attributeName));
+        artistSearchTable.getColumns().add(artNamesTb);
+        artistSearchTable.setItems(artists);
     }
 }

@@ -27,6 +27,7 @@ import java.sql.Statement;
 import java.util.Locale;
 
 public class HelloController {
+
     @FXML
     private Button btnLogin, btnRegister;
 
@@ -91,7 +92,6 @@ public class HelloController {
     @FXML
     private Button addArtBt;
 
-    @FXML
     public TableView artSearchTable;
     public TableColumn artNamesTb;
 
@@ -149,11 +149,11 @@ public class HelloController {
         parentBox.getChildren().add(parentBox.getChildren().size(),curContent);
         updateTable("Select * From Artist", "Artist");
         curContent = (Pane) parentBox.getChildren().get(1);
-        artistSearchTable = (TableView) curContent.lookup("#artistSearchTable");
+        artSearchTable = (TableView) curContent.lookup("#artistSearchTable");
         artNamesTb = new TableColumn<>("Name");
         artNamesTb.setCellValueFactory(new PropertyValueFactory<Artist,String>("artistFName"));
-        artistSearchTable.getColumns().add(artNamesTb);
-        artistSearchTable.setItems(artworks);
+        artSearchTable.getColumns().add(artNamesTb);
+        artSearchTable.setItems(artworks);
     }
     @FXML
     protected void onArtistBtClick(ActionEvent event) throws IOException{

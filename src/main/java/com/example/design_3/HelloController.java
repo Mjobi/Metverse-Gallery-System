@@ -567,20 +567,20 @@ public class HelloController {
 
     @FXML
     void MConfirmRegBtClick(ActionEvent event) {
-        if (txtAEmail.getText().isBlank() || txtAPassword.getText().isBlank() || txtAFName.getText().isBlank() || txtALName.getText().isBlank() || txtABirthYear.getText().isBlank() || txtACountry.getText().isBlank()) {
-            txtARegAlert.setText("Registration Failed! Try Again.");
-            txtARegAlert.setTextFill(RED);
+        if (txtMEmail.getText().isBlank() || txtMPassword.getText().isBlank() || txtMFName.getText().isBlank() || txtMLName.getText().isBlank() || txtMNumber.getText().isBlank()) {
+            txtMRegAlert.setText("Registration Failed! Try Again.");
+            txtMRegAlert.setTextFill(RED);
         } else {
             String dataBaseURL = "jdbc:ucanaccess://MetVerse_Gallery11.accdb";
             try {
                 Connection newConnection = DriverManager.getConnection(dataBaseURL);
                 System.out.println("Connected to MS Access database");
                 Statement sqlStatement = newConnection.createStatement();
-                String sql = "INSERT INTO Manager (First_Name, Last_Name, Email, Password, Country, Birth_Year) VALUES ('" + txtAFName.getText() + "','" + txtALName.getText() + "','" + txtAEmail.getText() + "','" + txtAPassword.getText() + "','" + txtACountry.getText() + "','" + txtABirthYear.getText() + "');";
+                String sql = "INSERT INTO Manager (First_Name, Last_Name, Email, Password, Office_Phone) VALUES ('" + txtMFName.getText() + "','" + txtMLName.getText() + "','" + txtMEmail.getText() + "','" + txtMPassword.getText() + "','" + txtMNumber.getText() + "');";
                 sqlStatement.executeUpdate(sql);
 
-                txtARegAlert.setText("Account Successfully Registered!");
-                txtARegAlert.setTextFill(GREEN);
+                txtMRegAlert.setText("Account Successfully Registered!");
+                txtMRegAlert.setTextFill(GREEN);
                 newConnection.close();
             }
             catch(Exception e){
@@ -604,20 +604,20 @@ public class HelloController {
 
     @FXML
     void AConfirmRegBtClick(ActionEvent event) {
-        if (txtMEmail.getText().isBlank() || txtMPassword.getText().isBlank() || txtMFName.getText().isBlank() || txtMLName.getText().isBlank() || txtMNumber.getText().isBlank()) {
-            txtMRegAlert.setText("Registration Failed! Try Again.");
-            txtMRegAlert.setTextFill(RED);
+        if (txtAEmail.getText().isBlank() || txtAPassword.getText().isBlank() || txtAFName.getText().isBlank() || txtALName.getText().isBlank() || txtABirthYear.getText().isBlank() || txtACountry.getText().isBlank()) {
+            txtARegAlert.setText("Registration Failed! Try Again.");
+            txtARegAlert.setTextFill(RED);
         } else {
             String dataBaseURL = "jdbc:ucanaccess://MetVerse_Gallery11.accdb";
             try {
                 Connection newConnection = DriverManager.getConnection(dataBaseURL);
                 System.out.println("Connected to MS Access database");
                 Statement sqlStatement = newConnection.createStatement();
-                String sql = "INSERT INTO Artist (First_Name, Last_Name, Email, Password, Office_Phone) VALUES ('" + txtMFName.getText() + "','" + txtMLName.getText() + "','" + txtMEmail.getText() + "','" + txtMPassword.getText() + "','" + txtMNumber.getText() + "');";
+                String sql = "INSERT INTO Artist (First_Name, Last_Name, Email, Password, Country, Birth_Year) VALUES ('" + txtAFName.getText() + "','" + txtALName.getText() + "','" + txtAEmail.getText() + "','" + txtAPassword.getText() + "','" + txtACountry.getText() + "','" + txtABirthYear.getText() + "');";
                 sqlStatement.executeUpdate(sql);
 
-                txtMRegAlert.setText("Account Successfully Registered!");
-                txtMRegAlert.setTextFill(GREEN);
+                txtARegAlert.setText("Account Successfully Registered!");
+                txtARegAlert.setTextFill(GREEN);
                 newConnection.close();
             }
             catch(Exception e){
